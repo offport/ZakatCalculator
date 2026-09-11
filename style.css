@@ -38,6 +38,8 @@ a{color:var(--gold2)}
 main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-direction:column;gap:14px}
 .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
 @media (min-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:22px 24px 60px}.top{padding:14px 24px}}
+/* phones: the header scrolls away instead of eating the screen, the tag line goes, the actions stay one tidy row */
+@media (max-width:560px){.top{position:static;padding:10px 12px;gap:8px}.brand .tag{display:none}.brand h1{font-size:18px}.hdr-actions{width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.hdr-actions .btn{padding:6px 4px;font-size:12px}}
 
 /* ---------- cards ---------- */
 .card{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--line2);border-radius:16px;padding:16px;box-shadow:var(--shadow);position:relative;min-width:0;overflow-wrap:anywhere}
@@ -109,7 +111,8 @@ main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-dir
 .verdict b{font-family:Georgia,serif;font-size:15px}
 .pays{margin:8px 0 0;padding:0;list-style:none;font-size:12px;color:var(--ink3)}
 .pays li{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
-.totals{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:12px}
+.totals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+@media (min-width:600px){.totals{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .totals .b{background:var(--surface2);border-radius:10px;padding:8px 10px;text-align:center}
 .totals .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
 .totals .v{font-family:Georgia,serif;font-size:18px;color:var(--gold2)}
