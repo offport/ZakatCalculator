@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#14100a">
+<title>Zakat Calculator</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314100a'/%3E%3Cpath d='M20 6a10 10 0 1 0 0 20 8 8 0 1 1 0-20z' fill='%23d4a53a'/%3E%3Cpath d='M23 9l1.2 2.6 2.8.4-2 2 .5 2.8L23 15.5 20.5 16.8l.5-2.8-2-2 2.8-.4z' fill='%23f1cf6b'/%3E%3C/svg%3E">
+</head>
+<body>
+<div class="pattern" aria-hidden="true"></div>
+
+<header class="top">
+  <div class="brand">
+    <span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M20 6a10 10 0 1 0 0 20 8 8 0 1 1 0-20z" fill="currentColor"/><path d="M24 8l1.2 2.6 2.8.4-2 2 .5 2.8L24 14.5l-2.5 1.3.5-2.8-2-2 2.8-.4z" fill="var(--gold2)"/></svg></span>
+    <div><h1>Zakat Calculator</h1><p class="tag">زكاة &middot; a zakat year from the day you choose &middot; everything stays on this device</p></div>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn sm" id="lock" title="Encrypt what is saved on this device with a passphrase">Passphrase</button>
+    <button class="btn sm" id="backup" title="Download everything as a JSON file">Backup</button>
+    <label class="btn sm file" title="Load a backup file">Restore<input type="file" id="restore" accept="application/json,.json"></label>
+    <button class="btn sm" id="print">Print</button>
+  </div>
+</header>
+
+<main>
+  <section class="card intro" id="intro">
+    <p><b>How it works.</b> Pick the day your zakat year starts and what you held that day. Add what you gain each month and any amounts on particular dates. Record the zakat you pay. For every completed zakat year the calculator shows the wealth held at its end, whether it was above the nisab, the zakat that was due (2.5&nbsp;%), what you paid for that year, and whether you <span class="chip met">met</span> it, paid <span class="chip above">above</span> it or fell <span class="chip below">below</span> it. The year in progress is projected.</p>
+    <p class="axnote">A zakat year is a lunar year (354 days). Payments made within a grace period after a year ends count for that year; earlier ones count as advance payments for the year in progress. Overpayment carries forward. Nothing here is sent anywhere &mdash; there is no server.</p>
+  </section>
+
+  <div class="grid">
+    <section class="card" id="s-settings">
+      <h2><span class="num">1</span>Start &amp; settings</h2>
+      <div class="form">
+        <label>Zakat year starts on <input type="date" id="f-start"><small class="hint" id="h-start"></small></label>
+        <label>Amount held that day <input type="number" step="0.01" min="0" id="f-opening" inputmode="decimal" placeholder="0.00"></label>
+        <label>Currency <input type="text" id="f-currency" maxlength="6" placeholder="SAR, USD, EUR…"></label>
+        <label>Zakat year
+          <select id="f-calendar"><option value="lunar">Lunar &mdash; 354 days (hawl)</option><option value="solar">Solar &mdash; 365 days</option></select>
+          <small class="hint" id="h-calendar"></small></label>
+        <label>Rate % <input type="number" step="0.001" min="0" id="f-rate" inputmode="decimal"><small class="hint">2.5 for a lunar year; 2.577 is often used for a solar year</small></label>
+        <label>Nisab from
+          <select id="f-nisabMode"><option value="gold">Gold &mdash; 85 g &times; price per gram</option><option value="silver">Silver &mdash; 595 g &times; price per gram</option><option value="direct">An amount I enter</option></select></label>
+        <label id="l-gold">Gold price per gram <input type="number" step="0.01" min="0" id="f-goldPrice" inputmode="decimal"></label>
+        <label id="l-silver" hidden>Silver price per gram <input type="number" step="0.01" min="0" id="f-silverPrice" inputmode="decimal"></label>
+        <label id="l-direct" hidden>Nisab amount <input type="number" step="0.01" min="0" id="f-nisabDirect" inputmode="decimal"></label>
+        <div class="nisab-line">Nisab: <b id="v-nisab">&mdash;</b></div>
+        <label>Grace days after a year ends <input type="number" step="1" min="0" max="365" id="f-graceDays" inputmode="numeric"><small class="hint">a payment made within this many days after a year's end counts for that year</small></label>
+        <label class="check"><input type="checkbox" id="f-carryForward"> Carry an overpayment forward to the next year</label>
+      </div>
+    </section>
+
+    <section class="card" id="s-gains">
+      <h2><span class="num">2</span>Monthly gains</h2>
+      <p class="axnote">What you add to your wealth each month &mdash; salary savings, rent, profit. Accrues on the same day every month from the date you give.</p>
+      <ul class="list" id="l-gains"></ul>
+      <form class="form row" id="a-gains" autocomplete="off">
+        <label>Amount per month <input type="number" step="0.01" min="0.01" name="amount" inputmode="decimal" required></label>
+        <label>From <input type="date" name="from" required></label>
+        <label>Until <small class="hint">optional</small> <input type="date" name="to"></label>
+        <label>Note <input type="text" name="note" maxlength="60" placeholder="salary savings"></label>
+        <button class="btn primary" type="submit">Add</button>
+      </form>
+    </section>
+
+    <section class="card" id="s-amounts">
+      <h2><span class="num">3</span>Amounts on a date</h2>
+      <p class="axnote">A bonus, an inheritance, a sale &mdash; or money that left: enter a negative amount.</p>
+      <ul class="list" id="l-amounts"></ul>
+      <form class="form row" id="a-amounts" autocomplete="off">
+        <label>Date <input type="date" name="date" required></label>
+        <label>Amount <input type="number" step="0.01" name="amount" inputmode="decimal" required placeholder="negative to take out"></label>
+        <label>Note <input type="text" name="note" maxlength="60" placeholder="bonus"></label>
+        <button class="btn primary" type="submit">Add</button>
+      </form>
+    </section>
+
+    <section class="card" id="s-payments">
+      <h2><span class="num">4</span>Zakat paid</h2>
+      <p class="axnote">Each payment is matched to a zakat year automatically; choose one yourself if it should count for a different year.</p>
+      <ul class="list" id="l-payments"></ul>
+      <form class="form row" id="a-payments" autocomplete="off">
+        <label>Date <input type="date" name="date" required></label>
+        <label>Amount <input type="number" step="0.01" min="0.01" name="amount" inputmode="decimal" required></label>
+        <label>For year <select name="forYear" id="f-forYear"><option value="">automatic</option></select></label>
+        <label>Note <input type="text" name="note" maxlength="60" placeholder="paid to …"></label>
+        <button class="btn primary" type="submit">Add</button>
+      </form>
+    </section>
+  </div>
+
+  <section class="card results" id="s-results">
+    <h2><span class="num">5</span>Your zakat years</h2>
+    <div id="r-empty" class="axnote">Set the start date and the amount held that day to see your zakat years.</div>
+    <div id="r-body" hidden>
+      <div class="strip" id="r-strip"></div>
+      <div id="r-current"></div>
+      <div id="r-years"></div>
+      <div class="totals" id="r-totals"></div>
+    </div>
+  </section>
+
+  <p class="foot">Local only: the data lives in this browser (optionally encrypted with your passphrase); use <b>Backup</b> to keep a copy. Zakat rules differ between schools and situations &mdash; this is arithmetic on the numbers you enter, not a fatwa. Check with a scholar for your circumstances.</p>
+</main>
+
+<dialog id="dlg">
+  <form method="dialog" id="dlg-form">
+    <h3 id="dlg-title">Passphrase</h3>
+    <p class="axnote" id="dlg-text"></p>
+    <label>Passphrase <input type="password" id="dlg-pass" autocomplete="current-password"></label>
+    <label id="dlg-l2" hidden>Repeat <input type="password" id="dlg-pass2" autocomplete="new-password"></label>
+    <p class="err" id="dlg-err"></p>
+    <div class="actions"><button class="btn" type="button" id="dlg-cancel">Cancel</button><button class="btn" type="button" id="dlg-remove" hidden>Remove passphrase</button><button class="btn primary" type="submit" id="dlg-ok">OK</button></div>
+  </form>
+</dialog>
+<div class="toast" id="toast" hidden></div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
