@@ -145,6 +145,17 @@ function renderList(name) {
   $(L.ul).innerHTML = items.length ? items.map((it) => { const r = L.row(it);
     return `<li data-id="${it.id}" class="${editing?.list === name && editing.id === it.id ? "edit" : ""}"><span class="what"><span class="when">${r.when}</span><br>${r.what}</span><span class="amt ${r.neg ? "neg" : ""}">${r.amt}</span><button class="del" data-del="${it.id}" title="Remove" aria-label="Remove">&#x2715;</button></li>`; }).join("")
     : `<li class="empty">${L.empty}</li>`;
+  fitList($(L.ul), items.length);
+}
+/** More than five entries: keep the list five rows tall and let it scroll; say how many there are. */
+const ROWS = 5;
+function fitList(ul, count) {
+  const more = ul.nextElementSibling?.classList.contains("list-more") ? ul.nextElementSibling : null;
+  const lis = ul.querySelectorAll("li[data-id]");
+  if (lis.length > ROWS) {
+    ul.classList.add("scroll"); ul.style.maxHeight = `${lis[ROWS].offsetTop - lis[0].offsetTop - 6 + 14}px`;   // five rows, plus the faded edge
+    (more || ul.insertAdjacentElement("afterend", Object.assign(document.createElement("div"), { className: "list-more" }))).textContent = `${count} entries · scroll for more`;
+  } else { ul.classList.remove("scroll"); ul.style.maxHeight = ""; more?.remove(); }
 }
 function afterList(name) { save(); renderResults(); renderList(name); if (name !== "payments") renderList("payments"); renderForYear(); renderYearPrices(); }
 function bindList(name) {
@@ -169,7 +180,7 @@ function bindList(name) {
     const it = S[name].find((x) => x.id === li.dataset.id); if (!it) return;
     editing = { list: name, id: it.id };
     for (const f of L.fields) { const el = form.elements[f]; if (el) el.value = it[f] ?? ""; }
-    form.querySelector("button[type=submit]").textContent = "Update"; renderList(name); form.elements[L.fields[0]].focus();
+    form.querySelector("button[type=submit]").textContent = "Update"; renderList(name); $(L.ul).querySelector("li.edit")?.scrollIntoView({ block: "nearest" }); form.elements[L.fields[0]].focus();
   });
 }
 function renderForYear() {

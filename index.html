@@ -38,7 +38,7 @@
       <div class="form">
         <label>Count from <input type="date" id="f-start"><small class="hint" id="h-start"></small></label>
         <label>Amount held that day <input type="number" step="0.01" min="0" id="f-opening" inputmode="decimal" placeholder="0.00"></label>
-        <label>Currency <input type="text" id="f-currency" maxlength="6" placeholder="SAR, USD, EUR…"></label>
+        <label>Currency <input type="text" id="f-currency" list="currencies" maxlength="6" placeholder="pick or type" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
         <label>Zakat year
           <select id="f-calendar"><option value="lunar">Lunar &mdash; 354 days (hawl)</option><option value="solar">Solar &mdash; 365 days</option></select>
           <small class="hint" id="h-calendar"></small></label>
@@ -138,6 +138,7 @@
     <div class="actions"><button class="btn" type="button" id="dlg-cancel">Cancel</button><button class="btn" type="button" id="dlg-remove" hidden>Remove passphrase</button><button class="btn primary" type="submit" id="dlg-ok">OK</button></div>
   </form>
 </dialog>
+<datalist id="currencies"><option value="SAR">Saudi riyal</option><option value="AED">UAE dirham</option><option value="QAR">Qatari riyal</option><option value="KWD">Kuwaiti dinar</option><option value="BHD">Bahraini dinar</option><option value="OMR">Omani rial</option><option value="JOD">Jordanian dinar</option><option value="EGP">Egyptian pound</option><option value="LBP">Lebanese pound</option><option value="IQD">Iraqi dinar</option><option value="TRY">Turkish lira</option><option value="MAD">Moroccan dirham</option><option value="DZD">Algerian dinar</option><option value="TND">Tunisian dinar</option><option value="LYD">Libyan dinar</option><option value="SDG">Sudanese pound</option><option value="PKR">Pakistani rupee</option><option value="INR">Indian rupee</option><option value="BDT">Bangladeshi taka</option><option value="MYR">Malaysian ringgit</option><option value="IDR">Indonesian rupiah</option><option value="BND">Brunei dollar</option><option value="NGN">Nigerian naira</option><option value="ZAR">South African rand</option><option value="KES">Kenyan shilling</option><option value="USD">US dollar</option><option value="CAD">Canadian dollar</option><option value="EUR">Euro</option><option value="GBP">Pound sterling</option><option value="CHF">Swiss franc</option><option value="SEK">Swedish krona</option><option value="NOK">Norwegian krone</option><option value="DKK">Danish krone</option><option value="AUD">Australian dollar</option><option value="NZD">New Zealand dollar</option><option value="SGD">Singapore dollar</option><option value="JPY">Japanese yen</option><option value="CNY">Chinese yuan</option><option value="KZT">Kazakhstani tenge</option><option value="UZS">Uzbekistani som</option><option value="AZN">Azerbaijani manat</option><option value="IRR">Iranian rial</option><option value="AFN">Afghan afghani</option><option value="MVR">Maldivian rufiyaa</option><option value="XOF">West African CFA franc</option></datalist>
 <div class="toast" id="toast" hidden></div>
 <script type="module" src="app.js"></script>
 </body>
