@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
-<meta name="color-scheme" content="dark">
-<meta name="theme-color" content="#14100a">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#111111">
 <title>Zakat Calculator</title>
 <link rel="stylesheet" href="style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2314100a'/%3E%3Cpath d='M20 6a10 10 0 1 0 0 20 8 8 0 1 1 0-20z' fill='%23d4a53a'/%3E%3Cpath d='M23 9l1.2 2.6 2.8.4-2 2 .5 2.8L23 15.5 20.5 16.8l.5-2.8-2-2 2.8-.4z' fill='%23f1cf6b'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111111'/%3E%3Cpath d='M20 6a10 10 0 1 0 0 20 8 8 0 1 1 0-20z' fill='%23c9a227'/%3E%3Cpath d='M23 9l1.2 2.6 2.8.4-2 2 .5 2.8L23 15.5 20.5 16.8l.5-2.8-2-2 2.8-.4z' fill='%23e6c65a'/%3E%3C/svg%3E">
 </head>
 <body>
 <div class="pattern" aria-hidden="true"></div>
@@ -16,7 +16,7 @@
 <header class="top">
   <div class="brand">
     <span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M20 6a10 10 0 1 0 0 20 8 8 0 1 1 0-20z" fill="currentColor"/><path d="M24 8l1.2 2.6 2.8.4-2 2 .5 2.8L24 14.5l-2.5 1.3.5-2.8-2-2 2.8-.4z" fill="var(--gold2)"/></svg></span>
-    <div><h1>Zakat Calculator</h1><p class="tag">زكاة &middot; a zakat year from the day you choose &middot; everything stays on this device</p></div>
+    <div><h1>Zakat Calculator</h1><p class="tag">زكاة &middot; a zakat year from the day your wealth reaches the nisab &middot; everything stays on this device</p></div>
   </div>
   <div class="hdr-actions">
     <button class="btn sm" id="lock" title="Encrypt what is saved on this device with a passphrase">Passphrase</button>
@@ -28,15 +28,15 @@
 
 <main>
   <section class="card intro" id="intro">
-    <p><b>How it works.</b> Pick the day your zakat year starts and what you held that day. Add what you gain each month and any amounts on particular dates. Record the zakat you pay. For every completed zakat year the calculator shows the wealth held at its end, whether it was above the nisab, the zakat that was due (2.5&nbsp;%), what you paid for that year, and whether you <span class="chip met">met</span> it, paid <span class="chip above">above</span> it or fell <span class="chip below">below</span> it. The year in progress is projected.</p>
-    <p class="axnote">A zakat year is a lunar year (354 days). Payments made within a grace period after a year ends count for that year; earlier ones count as advance payments for the year in progress. Overpayment carries forward. Nothing here is sent anywhere &mdash; there is no server.</p>
+    <p><b>How it works.</b> Pick the day you want to count from and what you held that day. The zakat year (<i>hawl</i>) begins on the first day that wealth is at or above the nisab and runs one lunar year. Add what you gain each month, amounts on particular dates, and debts that are due. Record the zakat you pay. For every completed year the calculator shows the wealth at its end (after debts), whether it was above the nisab at that year's gold or silver price, the zakat due (2.5&nbsp;%), what was paid for it, and whether you <span class="chip met">met</span> it, paid <span class="chip above">above</span> it or are still <span class="chip below">below</span> it. The year in progress is projected.</p>
+    <p class="axnote"><b>Assumptions.</b> Hanafi rule by default: only the wealth at the year's end is assessed, and a dip below the nisab during the year is noted but does not break the year (the Shafi'i, Maliki and Hanbali view, where a dip restarts the year, is a switch in the settings). A payment settles the oldest unpaid year first. An overpayment carries forward only if it was paid with the intention of zakat &mdash; otherwise it is ordinary charity. Nothing here is sent anywhere &mdash; there is no server.</p>
   </section>
 
   <div class="grid">
     <section class="card" id="s-settings">
       <h2><span class="num">1</span>Start &amp; settings</h2>
       <div class="form">
-        <label>Zakat year starts on <input type="date" id="f-start"><small class="hint" id="h-start"></small></label>
+        <label>Count from <input type="date" id="f-start"><small class="hint" id="h-start"></small></label>
         <label>Amount held that day <input type="number" step="0.01" min="0" id="f-opening" inputmode="decimal" placeholder="0.00"></label>
         <label>Currency <input type="text" id="f-currency" maxlength="6" placeholder="SAR, USD, EUR…"></label>
         <label>Zakat year
@@ -45,12 +45,18 @@
         <label>Rate % <input type="number" step="0.001" min="0" id="f-rate" inputmode="decimal"><small class="hint">2.5 for a lunar year; 2.577 is often used for a solar year</small></label>
         <label>Nisab from
           <select id="f-nisabMode"><option value="gold">Gold &mdash; 85 g &times; price per gram</option><option value="silver">Silver &mdash; 595 g &times; price per gram</option><option value="direct">An amount I enter</option></select></label>
-        <label id="l-gold">Gold price per gram <input type="number" step="0.01" min="0" id="f-goldPrice" inputmode="decimal"></label>
-        <label id="l-silver" hidden>Silver price per gram <input type="number" step="0.01" min="0" id="f-silverPrice" inputmode="decimal"></label>
-        <label id="l-direct" hidden>Nisab amount <input type="number" step="0.01" min="0" id="f-nisabDirect" inputmode="decimal"></label>
-        <div class="nisab-line">Nisab: <b id="v-nisab">&mdash;</b></div>
-        <label>Grace days after a year ends <input type="number" step="1" min="0" max="365" id="f-graceDays" inputmode="numeric"><small class="hint">a payment made within this many days after a year's end counts for that year</small></label>
-        <label class="check"><input type="checkbox" id="f-carryForward"> Carry an overpayment forward to the next year</label>
+        <label id="l-gold">Gold price per gram, today <input type="number" step="0.01" min="0" id="f-goldPrice" inputmode="decimal"></label>
+        <label id="l-silver" hidden>Silver price per gram, today <input type="number" step="0.01" min="0" id="f-silverPrice" inputmode="decimal"></label>
+        <label id="l-direct" hidden>Nisab amount, today <input type="number" step="0.01" min="0" id="f-nisabDirect" inputmode="decimal"></label>
+        <div class="nisab-line">Nisab today: <b id="v-nisab">&mdash;</b></div>
+        <div class="yp" id="yp" hidden>
+          <div class="yp-head">Price at each year's end <small class="hint">each year is judged against the nisab at its own <span id="yp-unit">gold price per gram</span>; leave a year blank to use today's. The day the first year begins is judged at today's price</small></div>
+          <div id="yp-rows"></div>
+        </div>
+        <label>Grace days after a year ends <input type="number" step="1" min="0" max="365" id="f-graceDays" inputmode="numeric"><small class="hint">a payment made up to this many days after a year ends is that year's zakat, paid late; anything paid before a year ends is an advance for the year in progress</small></label>
+        <label class="check"><input type="checkbox" id="f-autoStart"> <span>Start the zakat year on the first day the wealth reaches the nisab <small class="hint">if it was below the nisab on the date above</small></span></label>
+        <label class="check"><input type="checkbox" id="f-restartOnDip"> <span>Restart the year if the wealth falls below the nisab during it <small class="hint">Shafi'i, Maliki, Hanbali. Off = Hanafi: only the year's end counts, a dip is just flagged</small></span></label>
+        <label class="check"><input type="checkbox" id="f-carryForward"> <span>Carry an overpayment forward to the next year <small class="hint">assumes the extra was paid with the intention of zakat</small></span></label>
       </div>
     </section>
 
@@ -79,9 +85,22 @@
       </form>
     </section>
 
+    <section class="card" id="s-liabilities">
+      <h2><span class="num">4</span>Debts due</h2>
+      <p class="axnote">Money you owe that is due &mdash; a loan instalment, a bill, rent owed. It is deducted from the wealth while it is outstanding; give the date it was settled to stop deducting it. Long-term debt is usually only deducted for the instalments due within the year.</p>
+      <ul class="list" id="l-liabilities"></ul>
+      <form class="form row" id="a-liabilities" autocomplete="off">
+        <label>Due from <input type="date" name="date" required></label>
+        <label>Amount <input type="number" step="0.01" min="0.01" name="amount" inputmode="decimal" required></label>
+        <label>Settled on <small class="hint">optional</small> <input type="date" name="until"></label>
+        <label>Note <input type="text" name="note" maxlength="60" placeholder="car loan instalment"></label>
+        <button class="btn primary" type="submit">Add</button>
+      </form>
+    </section>
+
     <section class="card" id="s-payments">
-      <h2><span class="num">4</span>Zakat paid</h2>
-      <p class="axnote">Each payment is matched to a zakat year automatically; choose one yourself if it should count for a different year.</p>
+      <h2><span class="num">5</span>Zakat paid</h2>
+      <p class="axnote">Each payment is matched to a zakat year automatically and settles the oldest unpaid year first; choose a year yourself if it should count for a different one.</p>
       <ul class="list" id="l-payments"></ul>
       <form class="form row" id="a-payments" autocomplete="off">
         <label>Date <input type="date" name="date" required></label>
@@ -94,10 +113,12 @@
   </div>
 
   <section class="card results" id="s-results">
-    <h2><span class="num">5</span>Your zakat years</h2>
-    <div id="r-empty" class="axnote">Set the start date and the amount held that day to see your zakat years.</div>
+    <h2><span class="num">6</span>Your zakat years</h2>
+    <div id="r-empty" class="axnote">Set the date to count from and the amount held that day to see your zakat years.</div>
     <div id="r-body" hidden>
       <div class="strip" id="r-strip"></div>
+      <p class="note" id="r-note" hidden></p>
+      <div class="chart" id="r-chart" hidden></div>
       <div id="r-current"></div>
       <div id="r-years"></div>
       <div class="totals" id="r-totals"></div>

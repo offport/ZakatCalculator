@@ -1,12 +1,16 @@
 // Zakat calculator - the arithmetic. Pure: no DOM, no storage, unit tested.
 //
-// Model: a zakat year (hawl) is a lunar year, 354.367 days, counted from the
-// start date the user chose. Wealth on any day = opening amount + monthly gains
-// accrued so far + dated amounts on or before that day - zakat paid on or before
-// that day. At each year's end: if wealth >= nisab, zakat due = rate x wealth.
-// Payments are attributed to a year: one made within the grace window after a
-// year's end belongs to that year; otherwise to the year in progress (advance).
-// Overpayment can carry forward. Verdict per year: met / above / below.
+// Model. A zakat year (hawl) is a lunar year, 354.367 days. It begins on the first
+// day the zakatable wealth reaches the nisab (from the date the user chose - if the
+// wealth was already at nisab that day, that day). Zakatable wealth on any day =
+// opening amount + monthly gains accrued + dated amounts - zakat paid - debts due
+// that day. At each year's end: if the wealth is at or above that year's nisab
+// (gold / silver price of that year), zakat due = rate x wealth. Payments belong to
+// a year (within the grace window after a year's end -> that year; otherwise the
+// year in progress; or the year the user picks) and are applied oldest debt first:
+// arrears of earlier years, then the year's own due; what is left carries forward.
+// Optionally the hawl restarts when the wealth falls below nisab during a year
+// (Shafi'i / Maliki / Hanbali); by default only the year's end counts (Hanafi).
 
 export const LUNAR_YEAR_DAYS = 354.36707;
 export const SOLAR_YEAR_DAYS = 365.2425;
@@ -37,22 +41,22 @@ export function hijri(iso, style = "long") {
 export const DEFAULTS = {
   start: "", opening: 0, currency: "", calendar: "lunar", rate: 2.5,
   nisabMode: "gold", goldPrice: 0, silverPrice: 0, nisabDirect: 0,
+  yearPrices: {},                // { [n]: price (or direct nisab) at year n's end } - overrides the current price for that year
   graceDays: 60, carryForward: true,
+  autoStart: true,               // the hawl begins the first day the wealth reaches nisab
+  restartOnDip: false,           // Shafi'i / Maliki / Hanbali: a dip below nisab restarts the hawl
 };
 export function yearLength(calendar) { return calendar === "solar" ? SOLAR_YEAR_DAYS : LUNAR_YEAR_DAYS; }
-/** The nisab in the user's currency from the chosen standard. */
-export function nisabValue(s) {
-  if (s.nisabMode === "silver") return (Number(s.silverPrice) || 0) * SILVER_NISAB_GRAMS;
-  if (s.nisabMode === "direct") return Number(s.nisabDirect) || 0;
-  return (Number(s.goldPrice) || 0) * GOLD_NISAB_GRAMS;
-}
+/** The current price (or direct amount) the nisab is built from. */
+export function currentPrice(s) { return Number(s.nisabMode === "silver" ? s.silverPrice : s.nisabMode === "direct" ? s.nisabDirect : s.goldPrice) || 0; }
+export function nisabFromPrice(s, price) { return s.nisabMode === "direct" ? (Number(price) || 0) : (Number(price) || 0) * (s.nisabMode === "silver" ? SILVER_NISAB_GRAMS : GOLD_NISAB_GRAMS); }
+/** The nisab in the user's currency from the chosen standard, at today's price. */
+export function nisabValue(s) { return nisabFromPrice(s, currentPrice(s)); }
+/** Price used for year n: the year's own price if set, else the current one. */
+export function priceForYear(s, n) { const p = s.yearPrices?.[n]; return p != null && p !== "" && Number(p) > 0 ? Number(p) : currentPrice(s); }
+export const nisabForYear = (s, n) => nisabFromPrice(s, priceForYear(s, n));
 
 /* ---------- the timeline ---------- */
-/** Year n runs (start + (n-1) years, start + n years]; ends on the day the wealth is assessed. */
-export function yearWindow(start, n, calendar) {
-  const len = yearLength(calendar);
-  return { n, start: n === 1 ? start : addDays(start, len * (n - 1)), end: addDays(start, len * n) };
-}
 /** All the monthly gain instalments of one rule up to and including `until`. */
 export function monthlyInstalments(g, until) {
   const out = [];
@@ -65,7 +69,7 @@ export function monthlyInstalments(g, until) {
   }
   return out;
 }
-/** Wealth on a day: opening + gains accrued + dated amounts - zakat paid, all on or before that day. */
+/** Gross wealth on a day: opening + gains accrued + dated amounts - zakat paid, all on or before that day. */
 export function balanceAt(iso, data) {
   const s = data.settings;
   if (!s.start || iso < s.start) return 0;
@@ -75,73 +79,134 @@ export function balanceAt(iso, data) {
   for (const p of data.payments || []) if (p.date && p.date <= iso) b -= Number(p.amount) || 0;
   return Math.round(b * 100) / 100;
 }
-
-/* ---------- payments -> years ---------- */
-/**
- * Which year a payment is for: a manual "forYear" wins; otherwise a payment within
- * graceDays after a year's end is for that year, and anything else is for the year
- * in progress on that date (an advance payment).
- */
-export function yearOfPayment(p, s) {
-  if (p.forYear) return Number(p.forYear);
-  if (!s.start || !p.date || p.date < s.start) return 1;
-  const len = yearLength(s.calendar), elapsed = daysBetween(s.start, p.date);
-  const inProgress = Math.floor(elapsed / len) + 1;              // the year running on that day
-  const ended = inProgress - 1;                                   // the year that ended most recently
-  if (ended >= 1) { const endDay = addDays(s.start, len * ended); if (daysBetween(endDay, p.date) <= (Number(s.graceDays) || 0)) return ended; }
-  return inProgress;
+/** Debts outstanding on a day: each liability counts from its date until it is settled (its `until`, if any). */
+export function liabilitiesAt(iso, data) {
+  let d = 0;
+  for (const l of data.liabilities || []) if (l.date && l.date <= iso && (!l.until || iso < l.until)) d += Number(l.amount) || 0;
+  return Math.round(d * 100) / 100;
+}
+/** What zakat is assessed on: gross wealth minus debts due. */
+export const zakatableAt = (iso, data) => Math.round((balanceAt(iso, data) - liabilitiesAt(iso, data)) * 100) / 100;
+/** Every day on which the wealth can change, on or after `from` and up to `until`, sorted. */
+export function eventDates(data, from, until) {
+  const s = data.settings, set = new Set();
+  const add = (d) => { if (d && d >= from && d <= until) set.add(d); };
+  add(s.start);
+  for (const g of data.gains || []) for (const m of monthlyInstalments(g, until)) add(m.date);
+  for (const a of data.amounts || []) add(a.date);
+  for (const p of data.payments || []) add(p.date);
+  for (const l of data.liabilities || []) { add(l.date); if (l.until) add(l.until); }
+  return [...set].sort();
+}
+/** The first day on or after `from` when the zakatable wealth is at least `nisab`; null if never (up to `until`). */
+export function firstNisabDate(data, from, nisab, until) {
+  if (zakatableAt(from, data) >= nisab) return from;
+  for (const d of eventDates(data, from, until)) if (d > from && zakatableAt(d, data) >= nisab) return d;
+  return null;
 }
 
 /* ---------- the verdicts ---------- */
 const r2 = (v) => Math.round(v * 100) / 100;
 /**
- * Everything the results view shows. `today` is ISO; years whose end is on or before today
- * are settled, the one containing today is "current" (projected), later ones are not shown.
+ * Everything the results view shows. `today` is ISO. Years whose end is on or before
+ * today are settled; the one containing today is "current" (projected).
  */
 export function compute(data, today) {
   const s = { ...DEFAULTS, ...(data.settings || {}) };
-  if (!s.start) return { years: [], current: null, totals: null, nisab: nisabValue(s) };
-  const len = yearLength(s.calendar), rate = (Number(s.rate) || 2.5) / 100, nisab = nisabValue(s);
-  const elapsed = Math.max(0, daysBetween(s.start, today));
-  const currentN = Math.floor(elapsed / len) + 1;
-  const paidByYear = {};
-  for (const p of data.payments || []) { const n = yearOfPayment(p, s); (paidByYear[n] ??= []).push(p); }
-  const years = [];
-  let carry = 0, carryOut = 0;                                   // carryOut: what the last settled year passes on
-  for (let n = 1; n <= currentN; n++) {
-    const w = yearWindow(s.start, n, s.calendar);
-    const settled = w.end <= today;
-    const wealth = balanceAt(w.end, data);
-    const aboveNisab = wealth >= nisab && nisab > 0;
-    const due = aboveNisab ? r2(wealth * rate) : 0;
-    const pays = (paidByYear[n] || []).slice().sort((a, b) => a.date.localeCompare(b.date));
-    const paid = r2(pays.reduce((a, p) => a + (Number(p.amount) || 0), 0));
-    const credit = r2(paid + carry);
-    const diff = r2(credit - due);
-    let status;
-    if (!settled) status = "current";
-    else if (nisab <= 0) status = "no-nisab";
-    else if (!aboveNisab) status = "below-nisab";
-    else if (Math.abs(diff) < 0.5) status = "met";
-    else if (diff > 0) status = "above";
-    else status = "below";
-    const year = { n, start: w.start, end: w.end, settled, wealth, nisab, aboveNisab, due, paid, carriedIn: carry, credit, diff, status,
-      payments: pays, daysLeft: settled ? 0 : daysBetween(today, w.end), hijriStart: hijri(w.start, "short"), hijriEnd: hijri(w.end, "short") };
-    years.push(year);
-    carry = settled && s.carryForward && diff > 0 ? diff : 0;
-    if (settled) carryOut = carry;
+  const empty = { years: [], current: null, totals: null, nisab: nisabValue(s), start: null, startNote: "", notStarted: false, today, rate: Number(s.rate) || 2.5, calendar: s.calendar };
+  if (!s.start) return empty;
+  const len = yearLength(s.calendar), rate = (Number(s.rate) || 2.5) / 100, grace = Number(s.graceDays) || 0;
+  const horizon = addDays(today, len * 2);
+
+  // 1. when does the hawl begin? (judged at today's price - the per-year prices are for each year's end)
+  let start = s.start, startNote = "";
+  const nisab0 = nisabValue(s);
+  if (s.autoStart && nisab0 > 0 && zakatableAt(s.start, data) < nisab0) {
+    const d = firstNisabDate(data, s.start, nisab0, horizon);
+    if (!d || d > today) return { ...empty, notStarted: true, reason: `on ${s.start} the wealth (${zakatableAt(s.start, data)}) was below the nisab (${nisab0}), and it has not reached it since - no zakat year has begun` };
+    start = d; startNote = `The zakat year began on ${d}, the first day the wealth reached the nisab - on ${s.start} it was below it.`;
   }
-  const settledYears = years.filter((y) => y.settled);
-  // with carry-forward, a surplus that a later year already used up is not a surplus any more:
-  // what is left is the carry going into the year in progress
-  const totals = { due: r2(settledYears.reduce((a, y) => a + y.due, 0)), paid: r2(years.reduce((a, y) => a + y.paid, 0)),
-    shortfall: r2(settledYears.filter((y) => y.status === "below").reduce((a, y) => a - y.diff, 0)),
-    surplus: s.carryForward ? r2(carryOut) : r2(settledYears.filter((y) => y.status === "above").reduce((a, y) => a + y.diff, 0)),
-    met: settledYears.filter((y) => y.status === "met").length, above: settledYears.filter((y) => y.status === "above").length, below: settledYears.filter((y) => y.status === "below").length,
-    belowNisab: settledYears.filter((y) => y.status === "below-nisab").length };
-  const current = years.find((y) => !y.settled) || null;
-  if (current) current.wealthToday = balanceAt(today, data);
-  return { years, current, totals, nisab, rate: rate * 100, calendar: s.calendar, today };
+
+  // 2. the years: each ends a year after it starts; a dip below nisab is noted, and restarts the hawl if that rule is on
+  const years = [];
+  let n = 1, ys = start, base = start, k = 1;                     // base/k: the chain start and the year's index in it (cumulative rounding)
+  for (let guard = 0; guard < 400; guard++) {
+    const ye = addDays(base, len * k), settled = ye <= today, nisab = nisabForYear(s, n);
+    const upto = settled ? ye : today;
+    let dipDate = null, minW = Infinity;
+    for (const d of eventDates(data, ys, upto)) { if (d <= ys) continue; const w = zakatableAt(d, data); if (w < minW) minW = w; if (w < nisab && nisab > 0) { dipDate = d; break; } }
+    if (dipDate && s.restartOnDip) {
+      years.push({ n, start: ys, end: ye, status: "broken", brokenOn: dipDate, nisab, settled: true, due: 0, paid: 0, payments: [], hijriStart: hijri(ys, "short"), hijriEnd: hijri(dipDate, "short") });
+      const again = firstNisabDate(data, dipDate, nisab, horizon);
+      if (!again || again > today) break;                          // the hawl has not resumed yet
+      ys = again; base = again; k = 1; continue;
+    }
+    const gross = balanceAt(ye, data), debts = liabilitiesAt(ye, data), wealth = zakatableAt(ye, data);
+    const aboveNisab = nisab > 0 && wealth >= nisab;
+    years.push({ n, start: ys, end: ye, settled, nisab, price: priceForYear(s, n), gross, debts, wealth, aboveNisab, due: aboveNisab ? r2(wealth * rate) : 0,
+      dipped: !!dipDate, dipDate, minWealth: minW === Infinity ? wealth : minW, payments: [], paid: 0, carriedIn: 0, toArrears: 0, fromLater: 0, applied: 0, owed: 0, surplus: 0,
+      daysLeft: settled ? 0 : daysBetween(today, ye), hijriStart: hijri(ys, "short"), hijriEnd: hijri(ye, "short") });
+    if (!settled) break;
+    n++; k++; ys = ye;
+  }
+  const real = years.filter((y) => y.status !== "broken");
+
+  // 3. which year each payment is for
+  const yearOf = (p) => {
+    if (p.forYear && real.some((y) => y.n === Number(p.forYear))) return Number(p.forYear);
+    if (!p.date) return real[0]?.n ?? 1;
+    const ended = real.filter((y) => y.end <= p.date && daysBetween(y.end, p.date) <= grace).at(-1);
+    if (ended) return ended.n;
+    const inside = real.find((y) => p.date > y.start && p.date <= y.end) || real.find((y) => p.date <= y.start) || real.at(-1);
+    return inside?.n ?? 1;
+  };
+  for (const p of (data.payments || []).filter((p) => p.date && Number(p.amount) > 0)) { const y = real.find((x) => x.n === yearOf(p)); if (y) y.payments.push({ ...p, amount: Number(p.amount) }); }
+  for (const y of real) { y.payments.sort((a, b) => a.date.localeCompare(b.date)); y.paid = r2(y.payments.reduce((a, p) => a + p.amount, 0)); }
+
+  // 4. settle: oldest debt first, then the year's own due, then carry the rest forward
+  let carry = 0;
+  for (const y of real) {
+    let pool = r2(y.paid + carry); y.carriedIn = carry;
+    for (const prev of real) { if (prev === y) break; if (!prev.settled || prev.owed < 0.005 || pool <= 0) continue; const pay = r2(Math.min(pool, prev.owed)); prev.owed = r2(prev.owed - pay); prev.fromLater = r2(prev.fromLater + pay); y.toArrears = r2(y.toArrears + pay); pool = r2(pool - pay); }
+    y.applied = r2(Math.min(pool, y.due)); y.owed = r2(y.due - y.applied); pool = r2(pool - y.applied);
+    y.surplus = pool;
+    carry = y.settled && s.carryForward ? pool : 0;
+  }
+  for (const y of real) {
+    if (!y.settled) y.status = "current";
+    else if (y.nisab <= 0) y.status = "no-nisab";
+    else if (!y.aboveNisab) y.status = "below-nisab";
+    else if (y.owed >= 0.5) y.status = "below";
+    else if (y.surplus >= 0.5) y.status = "above";
+    else y.status = "met";
+  }
+
+  // 5. totals
+  const settled = real.filter((y) => y.settled);
+  const lastSettled = settled.at(-1);
+  const totals = { due: r2(settled.reduce((a, y) => a + y.due, 0)), paid: r2(real.reduce((a, y) => a + y.paid, 0)),
+    outstanding: r2(settled.reduce((a, y) => a + y.owed, 0)),
+    surplus: r2(lastSettled && s.carryForward ? lastSettled.surplus : settled.reduce((a, y) => a + (y.status === "above" ? y.surplus : 0), 0)),
+    met: settled.filter((y) => y.status === "met").length, above: settled.filter((y) => y.status === "above").length, below: settled.filter((y) => y.status === "below").length,
+    belowNisab: settled.filter((y) => y.status === "below-nisab").length, broken: years.filter((y) => y.status === "broken").length, dipped: real.filter((y) => y.dipped).length };
+  const current = real.find((y) => !y.settled) || null;
+  if (current) { current.wealthToday = zakatableAt(today, data); current.grossToday = balanceAt(today, data); current.debtsToday = liabilitiesAt(today, data); }
+  return { years, current, totals, nisab: nisabValue(s), start, startNote, notStarted: false, today, rate: rate * 100, calendar: s.calendar };
+}
+
+/* ---------- the chart: zakatable wealth over time ---------- */
+/**
+ * Points for a line chart from the hawl start to the current year's end: every day the wealth
+ * changes, every year end, and today. Each point carries that year's nisab; points after
+ * today are projections.
+ */
+export function series(data, today, result) {
+  const real = (result?.years || []).filter((y) => y.status !== "broken");
+  if (!real.length) return [];
+  const from = real[0].start, until = real.at(-1).end;
+  const dates = new Set([from, today, until, ...eventDates(data, from, until), ...real.map((y) => y.end)]);
+  const nisabAt = (d) => (real.find((y) => d > y.start && d <= y.end) || real.find((y) => d <= y.start) || real.at(-1)).nisab;
+  return [...dates].filter((d) => d >= from && d <= until).sort().map((d) => ({ date: d, wealth: zakatableAt(d, data), gross: balanceAt(d, data), nisab: nisabAt(d), projected: d > today }));
 }
 
 /* ---------- money formatting ---------- */
