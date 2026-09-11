@@ -1,12 +1,12 @@
-/* Zakat Calculator - gold on white and black. Geometric, phone-first. No external fonts or images. */
+/* Zakat Calculator - gold on ivory, deep emerald for the header and tiles, charcoal ink. Geometric, phone-first. No external fonts or images. */
 :root{
-  --bg:#ffffff; --bg2:#fcfbf7; --surface:#ffffff; --surface2:#f6f6f6; --surface3:#ececec;
-  --ink:#111111; --ink2:#333333; --ink3:#6b6b6b;
-  --line:#e4e4e4; --line2:#d2d2d2;
-  --gold:#c9a227; --gold2:#e6c65a; --gold-dark:#8f7118; --gold-soft:#fff7dc; --gold-line:#e9d48a;
-  --black:#111111; --black2:#1d1d1d; --black3:#2a2a2a;
-  --green:#1d7a3b; --greenbg:#e5f5ea; --amber:#8a6400; --amberbg:#fff3c9; --red:#b3261e; --redbg:#fce9e7; --blue:#1f5fa8; --bluebg:#e6effb;
-  --shadow:0 1px 2px rgba(0,0,0,.06), 0 10px 30px rgba(0,0,0,.07);
+  --bg:#f7f5ef; --bg2:#f3f0e7; --surface:#fffefb; --surface2:#f4f1e9; --surface3:#ebe7dc;
+  --ink:#1f2a26; --ink2:#3d4a45; --ink3:#6e7a74;
+  --line:#e4dfd2; --line2:#d3ccbb;
+  --gold:#c9a227; --gold2:#e6c65a; --gold-dark:#806413; --gold-soft:#fbf3d9; --gold-line:#e9d48a;
+  --deep:#123c33; --deep2:#194a3f; --deep3:#225a4d;
+  --green:#1d7a3b; --greenbg:#e3f3e7; --amber:#8a6400; --amberbg:#fbf0c6; --red:#b3261e; --redbg:#fbe7e4; --blue:#1f5fa8; --bluebg:#e4edf8;
+  --shadow:0 1px 2px rgba(31,42,38,.05), 0 10px 30px rgba(31,42,38,.07);
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -16,10 +16,10 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Segoe UI",sy
 h1,h2,h3{font-family:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;font-weight:700;margin:0;letter-spacing:-.01em;color:var(--ink)}
 button,input,select{font:inherit;color:inherit}
 a{color:var(--gold-dark)}
-::selection{background:var(--gold);color:#111}
+::selection{background:var(--gold);color:var(--ink)}
 small{font-size:.86em}
 
-/* geometric ground: an eight-point star lattice drawn with gradients in gold, very faint on white */
+/* geometric ground: an eight-point star lattice drawn with gradients in gold, very faint on ivory */
 .pattern{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.6;
   background:
     radial-gradient(circle at 50% 0%, rgba(201,162,39,.16), transparent 55%),
@@ -29,15 +29,15 @@ small{font-size:.86em}
   background-size:100% 100%, 168px 168px, 100% 100%, 100% 100%;
   -webkit-mask-image:linear-gradient(#000, rgba(0,0,0,.3) 40%, rgba(0,0,0,.3));mask-image:linear-gradient(#000, rgba(0,0,0,.3) 40%, rgba(0,0,0,.3))}
 
-/* ---------- header: black, gold on it ---------- */
-.top{position:sticky;top:0;z-index:5;background:var(--black);color:#fff;border-bottom:2px solid var(--gold);padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+/* ---------- header: deep emerald, gold on it ---------- */
+.top{position:sticky;top:0;z-index:5;background:var(--deep);color:#fff;border-bottom:2px solid var(--gold);padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:12px;min-width:0;flex:1}
-.brand .mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(160deg,var(--black3),var(--black));border:1px solid var(--gold);display:grid;place-items:center;color:var(--gold);flex:none;box-shadow:0 0 18px rgba(201,162,39,.35)}
+.brand .mark{width:40px;height:40px;border-radius:12px;background:linear-gradient(160deg,var(--deep3),var(--deep));border:1px solid var(--gold);display:grid;place-items:center;color:var(--gold);flex:none;box-shadow:0 0 18px rgba(201,162,39,.35)}
 .brand .mark svg{width:24px;height:24px;display:block}
 .brand h1{font-size:20px;font-weight:700;line-height:1.1;color:var(--gold2)}
-.brand .tag{margin:2px 0 0;font-size:11.5px;color:#bdbdbd;letter-spacing:.02em}
+.brand .tag{margin:2px 0 0;font-size:11.5px;color:#b9cbc4;letter-spacing:.02em}
 .hdr-actions{display:flex;gap:6px;flex-wrap:wrap}
-.top .btn{background:var(--black2);border-color:#3a3a3a;color:#eee}
+.top .btn{background:var(--deep2);border-color:#2f6a5b;color:#eef3f0}
 .top .btn:hover{border-color:var(--gold);color:var(--gold2)}
 main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-direction:column;gap:14px}
 .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
@@ -49,8 +49,9 @@ main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-dir
 .card{background:var(--surface);border:1px solid var(--gold-line);border-radius:16px;padding:16px;box-shadow:var(--shadow);position:relative;min-width:0;overflow-wrap:anywhere}
 .card::before{content:"";position:absolute;inset:6px;border:1px solid rgba(201,162,39,.22);border-radius:11px;pointer-events:none}
 .card h2{font-size:16.5px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.num{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--gold2),var(--gold) 60%,var(--gold-dark));color:#111;display:grid;place-items:center;font:700 12.5px "Segoe UI",system-ui,sans-serif;flex:none;box-shadow:0 0 0 2px #fff, 0 0 0 3px var(--gold)}
+.num{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--gold2),var(--gold) 60%,var(--gold-dark));color:var(--ink);display:grid;place-items:center;font:700 12.5px "Segoe UI",system-ui,sans-serif;flex:none;box-shadow:0 0 0 2px var(--surface), 0 0 0 3px var(--gold)}
 .intro p{margin:0 0 8px}
+.intro .chip{padding:0 8px;line-height:1.45;vertical-align:baseline}
 .axnote{font-size:12px;color:var(--ink3);margin:0 0 10px}
 .hint{display:block;font-size:11px;color:var(--ink3);font-weight:400;margin-top:3px}
 .muted{color:var(--ink3)}
@@ -58,16 +59,19 @@ main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-dir
 /* ---------- forms ---------- */
 .form{display:flex;flex-direction:column;gap:10px}
 .form label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink2);font-weight:500;min-width:0}
-.form input,.form select{width:100%;min-width:0;max-width:100%;background:#fff;border:1px solid var(--line2);border-radius:10px;padding:10px 12px;font-size:16px;color:var(--ink);min-height:44px}
+.form input,.form select{width:100%;min-width:0;max-width:100%;background:#fff;border:1px solid var(--line2);border-radius:10px;padding:0 12px;font-size:16px;line-height:1.3;color:var(--ink);height:44px}
 .form input:focus,.form select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.25)}
 .form input[type=date]{color-scheme:light}
-.form .check{flex-direction:row;align-items:flex-start;gap:10px;font-weight:400;color:var(--ink)}
-.form .check input{width:20px;height:20px;min-height:0;accent-color:var(--gold-dark);flex:none;margin-top:1px}
+.form .check{flex-direction:row;align-items:flex-start;gap:10px;font-weight:400;color:var(--ink);font-size:13px;line-height:1.45}
+.form .check input{width:20px;height:20px;min-height:0;accent-color:var(--gold-dark);flex:none;margin:0}
+.form .check span{padding-top:0}
 .form .check .hint{margin-top:1px}
 .form.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px;margin-top:8px;padding-top:12px;border-top:1px dashed var(--gold-line)}
-.form.row label:has(input[name=note]){grid-column:1/-1}
+.form.row label{justify-content:flex-end}
+.form label .lt .hint{display:inline;margin:0 0 0 4px}
+.form.row label:has(input[name=note]):nth-child(3){grid-column:1/-1}
 .form.row button{grid-column:1/-1}
-@media (min-width:520px){.form.row{grid-template-columns:repeat(3,minmax(0,1fr))}.form.row label:has(input[name=note]){grid-column:auto}}
+@media (min-width:520px){.form.row{grid-template-columns:repeat(3,minmax(0,1fr))}.form.row label:has(input[name=note]):nth-child(3){grid-column:auto}.form.row label:has(input[name=note]):nth-child(4){grid-column:1/-1}}
 .nisab-line{font-size:13px;color:var(--ink2);padding:8px 12px;background:var(--gold-soft);border:1px solid var(--gold-line);border-radius:10px}
 .nisab-line b{color:var(--ink);font-weight:700;font-size:14.5px;font-variant-numeric:tabular-nums}
 .yp{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface2)}
@@ -76,12 +80,12 @@ main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-dir
 .yp-row:first-of-type{border-top:0}
 .yp-row span{display:flex;flex-direction:column;font-size:12.5px;color:var(--ink)}
 .yp-row span small{color:var(--ink3);font-size:11px}
-.yp-row input{min-height:38px!important;padding:6px 10px!important;font-size:15px!important}
+.yp-row input{height:38px!important;padding:0 10px!important;font-size:15px!important;max-width:150px;justify-self:end}
 .yp-row b{font-weight:600;color:var(--gold-dark);white-space:nowrap;font-size:13px;font-variant-numeric:tabular-nums}
-@media (max-width:420px){.yp-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.yp-row b{grid-column:1/-1;text-align:right}}
-.btn{background:#fff;border:1px solid var(--line2);border-radius:10px;padding:10px 14px;font-size:14px;cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px}
+@media (max-width:420px){.yp-row{grid-template-columns:minmax(0,1fr) auto}.yp-row input{max-width:120px}.yp-row b{grid-column:1/-1;text-align:right;margin-top:-2px}}
+.btn{background:var(--surface);border:1px solid var(--line2);border-radius:10px;padding:10px 14px;font-size:14px;cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px}
 .btn:hover{border-color:var(--gold);color:var(--ink)}
-.btn.primary{background:linear-gradient(180deg,var(--gold2),var(--gold));border-color:var(--gold-dark);color:#111;font-weight:600}
+.btn.primary{background:linear-gradient(180deg,var(--gold2),var(--gold));border-color:var(--gold-dark);color:var(--ink);font-weight:600}
 .btn.primary:hover{background:linear-gradient(180deg,#f0d472,var(--gold))}
 .btn.sm{padding:6px 10px;font-size:12.5px;min-height:34px}
 .btn.file{position:relative;overflow:hidden}.btn.file input{position:absolute;inset:0;opacity:0;cursor:pointer}
@@ -107,16 +111,16 @@ main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-dir
 /* ---------- results ---------- */
 .chip{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:2px 10px;font-size:11.5px;font-weight:600;white-space:nowrap;background:var(--surface3);color:var(--ink2)}
 .chip.met{background:var(--greenbg);color:var(--green)}.chip.above{background:var(--bluebg);color:var(--blue)}.chip.below{background:var(--redbg);color:var(--red)}
-.chip.current{background:var(--black);color:var(--gold2)}.chip.flat{background:var(--surface3);color:var(--ink3)}
+.chip.current{background:var(--deep);color:var(--gold2)}.chip.flat{background:var(--surface3);color:var(--ink3)}
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:6px 0 12px}
-.strip .b{background:var(--black);color:#fff;border-radius:10px;padding:8px 10px;border-bottom:2px solid var(--gold)}
-.strip .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#a9a9a9}
+.strip .b{background:var(--deep);color:#fff;border-radius:10px;padding:8px 10px;border-bottom:2px solid var(--gold)}
+.strip .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#a7bdb4}
 .strip .v{font-weight:600;font-size:16px;color:var(--gold2);margin-top:2px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-.strip .v small{font:12px system-ui,sans-serif;color:#a9a9a9}
+.strip .v small{font:12px system-ui,sans-serif;color:#a7bdb4}
 .strip .v .red{color:#ff9d94}
 .note{margin:0 0 12px;padding:10px 12px;border-radius:10px;background:var(--gold-soft);border:1px solid var(--gold-line);font-size:13px;color:var(--ink)}
-.year{border:1px solid var(--line2);border-radius:14px;padding:12px 14px;margin-bottom:10px;background:#fff}
-.year.now{border-color:var(--gold);background:linear-gradient(180deg,var(--gold-soft),#fff 70%)}
+.year{border:1px solid var(--line2);border-radius:14px;padding:12px 14px;margin-bottom:10px;background:var(--surface)}
+.year.now{border-color:var(--gold);background:linear-gradient(180deg,var(--gold-soft),var(--surface) 70%)}
 .year.broken{border-style:dashed;background:var(--surface2)}
 .year .head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .year .head h3{font-size:15.5px;flex:1;min-width:0}
@@ -132,7 +136,7 @@ main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-dir
 @media (max-width:480px){.kv{grid-template-columns:1fr}}
 .verdict{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:13.5px;background:var(--surface3);color:var(--ink2)}
 .verdict.met{background:var(--greenbg);color:var(--green)}.verdict.above{background:var(--bluebg);color:var(--blue)}.verdict.below{background:var(--redbg);color:var(--red)}
-.verdict.current{background:var(--black);color:#fff}.verdict.current b{color:var(--gold2)}
+.verdict.current{background:var(--deep);color:#fff}.verdict.current b{color:var(--gold2)}
 .verdict.flat{background:var(--surface3);color:var(--ink2)}
 .verdict b{font-weight:700;font-size:14.5px}
 .dip{margin:8px 0 0;font-size:12px;color:var(--amber);background:var(--amberbg);border-radius:8px;padding:6px 10px}
@@ -152,8 +156,8 @@ main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-dir
 .chart-title{font:600 12.5px "Segoe UI",system-ui,sans-serif;color:var(--ink2);margin:6px 0 4px}
 .chart .grid{stroke:var(--line);stroke-width:1}
 .chart .lbl{font:11px "Segoe UI",system-ui,sans-serif;fill:var(--ink3)}
-.chart .lbl.yr{fill:var(--gold-dark);font-weight:600}
-.chart .lbl.today{fill:var(--ink);font-weight:600}
+.chart .lbl.yr{fill:var(--gold-dark);font-weight:700}
+.chart .lbl.today{fill:var(--ink);font-weight:700}
 .chart .lbl.v{font-size:10px;fill:var(--ink2)}
 .chart .yr{stroke:var(--line2);stroke-dasharray:2 3}
 .chart .nisab{fill:none;stroke:var(--red);stroke-width:1.5;stroke-dasharray:5 4}
@@ -162,7 +166,7 @@ main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-dir
 .chart .today{stroke:var(--gold);stroke-width:1.5}
 .chart .pay{fill:var(--gold);stroke:var(--ink);stroke-width:1}
 .chart .ye{fill:var(--ink);stroke:var(--gold);stroke-width:2}
-.chart .ye.under{fill:#fff;stroke:var(--red)}
+.chart .ye.under{fill:var(--surface);stroke:var(--red)}
 .chart .due{fill:var(--gold)}
 .chart .paid{fill:var(--ink)}
 .chart .paid.short{fill:var(--red)}
@@ -176,15 +180,15 @@ main{max-width:1040px;margin:0 auto;padding:16px 14px 48px;display:flex;flex-dir
 .legend .sw.due{background:var(--gold)}.legend .sw.paidsw{background:var(--ink)}.legend .sw.shortsw{background:var(--red)}
 
 /* ---------- dialog / toast ---------- */
-dialog{background:#fff;color:var(--ink);border:1px solid var(--gold);border-radius:16px;padding:18px;width:min(420px,calc(100vw - 32px));box-shadow:var(--shadow)}
-dialog::backdrop{background:rgba(0,0,0,.6);backdrop-filter:blur(4px)}
+dialog{background:var(--surface);color:var(--ink);border:1px solid var(--gold);border-radius:16px;padding:18px;width:min(420px,calc(100vw - 32px));box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(18,60,51,.55);backdrop-filter:blur(4px)}
 dialog h3{font-size:17px;margin-bottom:4px}
 dialog label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink2);margin-top:10px}
-dialog input{width:100%;background:#fff;border:1px solid var(--line2);border-radius:10px;padding:10px 12px;font-size:16px;min-height:44px}
+dialog input{width:100%;background:#fff;border:1px solid var(--line2);border-radius:10px;padding:0 12px;font-size:16px;height:44px}
 dialog input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,162,39,.25)}
 dialog .err{color:var(--red);font-size:12.5px;min-height:18px;margin:8px 0 0}
 dialog .actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
-.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--black);color:#fff;border:1px solid var(--gold);border-radius:12px;padding:10px 16px;font-size:13.5px;box-shadow:var(--shadow);z-index:9;max-width:calc(100vw - 32px)}
+.toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:var(--deep);color:#fff;border:1px solid var(--gold);border-radius:12px;padding:10px 16px;font-size:13.5px;box-shadow:var(--shadow);z-index:9;max-width:calc(100vw - 32px)}
 
 /* ---------- print ---------- */
 @media print{

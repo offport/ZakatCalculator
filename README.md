@@ -13,7 +13,7 @@ zakat due against the zakat paid for each year.
 
 Static files only — no server, no build, no external scripts, no network at all. Everything
 you enter stays in your browser (optionally encrypted with a passphrase). Made for phones first.
-Gold on white and black.
+Gold on a light ivory ground, deep emerald for the header and summary tiles, charcoal text.
 
 ## How it calculates
 
@@ -109,7 +109,7 @@ To publish on GitHub Pages: push the repository and enable Pages on the branch r
 
 ```
 index.html   the page (strict CSP in a meta tag)
-style.css    gold on white and black, phone first, print styles
+style.css    gold / ivory / emerald theme, phone first, print styles
 app.js       state, storage, encryption, forms, rendering, the graph
 calc.js      the arithmetic - pure, shared with the tests
 tests/       node --test
