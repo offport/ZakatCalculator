@@ -19,6 +19,12 @@ count from a date  →  hawl begins when wealth ≥ nisab  →  a lunar year (35
 Static files only — no server, no build, no external scripts, no network at all. Everything you
 enter stays in your browser (optionally encrypted with a passphrase). Made for phones first.
 
+## Screenshots
+
+A first visit, captured in a private browsing window with no data — nothing stored yet, every field at its default.
+
+<p><img src="docs/screenshots/desktop.png" width="640" alt="Desktop: the intro card and the six entry cards"> <img src="docs/screenshots/phone.png" width="300" alt="Phone: the same page at phone width"></p>
+
 ---
 
 ## What it is — and what it is not
